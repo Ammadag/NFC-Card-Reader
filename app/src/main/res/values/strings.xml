@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">NFC Card Reader</string>
+    <string name="service_description">My NFC Card Emulation Service\n</string>
+    <string name="aid_group_description">Supported AIDs\n</string>
 </resources>
