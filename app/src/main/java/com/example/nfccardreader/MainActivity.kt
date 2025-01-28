@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
 
         textView = findViewById(R.id.textView)
 
-        // Initialize NFC adapter
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         if (nfcAdapter == null) {
             Toast.makeText(this, "NFC is not supported on this device", Toast.LENGTH_LONG).show()
@@ -76,7 +75,6 @@ class MainActivity : ComponentActivity() {
                 responses.forEachIndexed { i, m ->
                     saveCardData(i,m)
                 }
-                showEmulationPrompt()
                 textView.text = responses.joinToString("\n")
 
                 Log.d("APDU Responses", responses.joinToString("\n"))
@@ -90,30 +88,7 @@ class MainActivity : ComponentActivity() {
         val prefs = getSharedPreferences("CardData", MODE_PRIVATE)
         prefs.edit().putString(index.toString(), data).apply()
     }
-    private fun showEmulationPrompt() {
-        val builder = android.app.AlertDialog.Builder(this)
-        builder.setTitle("Card Saved")
-            .setMessage("Do you want to emulate this card?")
-            .setPositiveButton("Yes") { _, _ ->
-                startCardEmulation()
-            }
-            .setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
-    }
 
-    private fun startCardEmulation() {
-        val prefs = getSharedPreferences("CardData", MODE_PRIVATE)
-        val apduResponses = (0 until prefs.all.size).mapNotNull { prefs.getString(it.toString(), null) }
-
-        if (apduResponses.isNotEmpty()) {
-            Toast.makeText(this, "Card emulation ready", Toast.LENGTH_SHORT).show()
-            // Let the system know that emulation can proceed (if required)
-        } else {
-            Toast.makeText(this, "No card data available to emulate", Toast.LENGTH_LONG).show()
-        }
-    }
 
 }
 

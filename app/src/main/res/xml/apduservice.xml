@@ -7,5 +7,7 @@
         android:description="@string/aid_group_description">
         <aid-filter android:name="F0010203040506" />
         <aid-filter android:name="A0000002471001" />
+        <aid-filter android:name="A0000000041010" /> //for mastercard
+        <aid-filter android:name="A0000000031010" /> //for visa card
     </aid-group>
 </host-apdu-service>
