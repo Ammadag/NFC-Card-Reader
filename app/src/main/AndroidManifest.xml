@@ -38,6 +38,7 @@
         </activity>
         <service
             android:name=".CardEmulationService"
+            android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE">
             <intent-filter>
                 <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
