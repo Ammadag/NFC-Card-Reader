@@ -66,6 +66,7 @@ class MainActivity : ComponentActivity() {
                 for (command in cmd.commands) {
                     try {
                         val response = isoDep.transceive(command)
+                        Log.d("APDU Response" , "$response")
                         val parsedResponse = response.joinToString(" ") { "%02X".format(it) }
                         responses.add(parsedResponse)
                     } catch (e: Exception) {
