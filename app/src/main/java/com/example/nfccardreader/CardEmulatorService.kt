@@ -6,19 +6,23 @@ import android.util.Log
 
 class CardEmulatorService : HostApduService() {
 
-   private val command= commandMap()
+    private val command = CommandMap()
     private val cmdMap = command.commandResponseMap
 
-
     override fun processCommandApdu(commandApdu: ByteArray, extras: Bundle?): ByteArray? {
-        // Check if the incoming command exists in the predefined map
+        // Convert the incoming APDU command to a hex string
         val apduHex = commandApdu.joinToString("") { "%02X".format(it) }
         Log.d("NFC_APDU", "Received Command: $apduHex")
+
+        // Look for the corresponding response in the map
         val response = cmdMap[commandApdu]
+
         if (response != null) {
-            return response // Return the corresponding response
+            // If the command is recognized, return the corresponding response
+            return response
         }
-        // If the command is not recognized, return "Unknown Command"
+
+        // If the command is not recognized, return a "File Not Found" status word (SW1 SW2)
         return hexStringToByteArray("6A82") // Status word for "File Not Found"
     }
 
