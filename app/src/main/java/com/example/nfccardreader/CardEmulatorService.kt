@@ -6,49 +6,44 @@ import android.util.Log
 
 class CardEmulatorService : HostApduService() {
 
-
-//    private val command = CommandMap()
-//    private val cmdMap = command.commandResponseMap
-
-    override fun processCommandApdu(commandApdu: ByteArray, extras: Bundle?): ByteArray? {
-        // Convert the incoming APDU command to a hex string
-        val apduHex = commandApdu.joinToString("") { "%02X".format(it) }
-        Log.d("NFC_APDU", "Received Command: $apduHex")
-
-        // Check if the received command matches the custom command
-        if (commandApdu.contentEquals(byteArrayOf(0x00, 0xA5.toByte(), 0x00, 0x00, 0x04, 0x12, 0x34, 0x56, 0x78))) {
-            Log.d("NFC_APDU", "Custom command received!")
-
-            // Define the string response
-            val responseString = "Hello NFC Reader"
-
-            // Convert string to byte array
-            val responseBytes = responseString.toByteArray(Charsets.UTF_8)
-
-            // Append status word (SW1 SW2) for success (0x90 0x00)
-            val finalResponse = responseBytes + byteArrayOf(0x90.toByte(), 0x00.toByte())
-
-            Log.d("NFC_APDU", "Sending Response: ${finalResponse.joinToString("") { "%02X".format(it) }}")
-
-            return finalResponse
+    override fun processCommandApdu(commandApdu: ByteArray?, extras: Bundle?): ByteArray {
+        if (commandApdu == null) {
+            Log.e("HCE", "Received null APDU command")
+            return "6F00".hexStringToByteArray() // Custom unknown error response
         }
 
-        // If the command is not recognized, return "Command Not Found" error
-        return byteArrayOf(0x6A.toByte(), 0x82.toByte()) // SW1 SW2 for "File Not Found"
-    }
+        val hexCommand = commandApdu.joinToString(" ") { "%02X".format(it) }
+        Log.d("HCE Received Command", hexCommand)
 
+        return when {
+            commandApdu.contentEquals(
+                byteArrayOf(
+                    0x00, 0xA4.toByte(), 0x04, 0x00, 0x07,
+                    0xA0.toByte(), 0x00, 0x00, 0x00, 0x04, 0x10, 0x10
+                )
+            ) -> {
+                Log.d("HCE Response", "Valid AID selected")
+                "9000".hexStringToByteArray() // Success Response
+            }
+
+            else -> {
+                Log.d("HCE Response", "Command not recognized")
+                "6A82".hexStringToByteArray() // File not found
+            }
+        }
+    }
 
     override fun onDeactivated(reason: Int) {
-        // Handle card emulation deactivation if needed
+        Log.d("HCE", "Card Emulation Deactivated: Reason $reason")
     }
+}
 
-    // Utility function to convert hex string to byte array
-    private fun hexStringToByteArray(s: String): ByteArray {
-        val len = s.length
-        val data = ByteArray(len / 2)
-        for (i in 0 until len step 2) {
-            data[i / 2] = ((Character.digit(s[i], 16) shl 4) + Character.digit(s[i + 1], 16)).toByte()
-        }
-        return data
+// Extension function to convert hex string to byte array
+fun String.hexStringToByteArray(): ByteArray {
+    val cleanedHex = this.replace("\\s".toRegex(), "") // Remove spaces if any
+    require(cleanedHex.length % 2 == 0) { "Invalid hex string length" }
+
+    return ByteArray(cleanedHex.length / 2) { i ->
+        cleanedHex.substring(i * 2, i * 2 + 2).toInt(16).toByte()
     }
 }
