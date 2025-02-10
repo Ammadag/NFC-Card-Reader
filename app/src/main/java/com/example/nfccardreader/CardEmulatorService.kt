@@ -14,17 +14,28 @@ class CardEmulatorService : HostApduService() {
         val apduHex = commandApdu.joinToString("") { "%02X".format(it) }
         Log.d("NFC_APDU", "Received Command: $apduHex")
 
-        // Look for the corresponding response in the map
-        val response = cmdMap[commandApdu]
+        // Check if the received command matches the custom command
+        if (commandApdu.contentEquals(byteArrayOf(0x00, 0xA5.toByte(), 0x00, 0x00, 0x04, 0x12, 0x34, 0x56, 0x78))) {
+            Log.d("NFC_APDU", "Custom command received!")
 
-        if (response != null) {
-            // If the command is recognized, return the corresponding response
-            return response
+            // Define the string response
+            val responseString = "Hello NFC Reader"
+
+            // Convert string to byte array
+            val responseBytes = responseString.toByteArray(Charsets.UTF_8)
+
+            // Append status word (SW1 SW2) for success (0x90 0x00)
+            val finalResponse = responseBytes + byteArrayOf(0x90.toByte(), 0x00.toByte())
+
+            Log.d("NFC_APDU", "Sending Response: ${finalResponse.joinToString("") { "%02X".format(it) }}")
+
+            return finalResponse
         }
 
-        // If the command is not recognized, return a "File Not Found" status word (SW1 SW2)
-        return hexStringToByteArray("6A82") // Status word for "File Not Found"
+        // If the command is not recognized, return "Command Not Found" error
+        return byteArrayOf(0x6A.toByte(), 0x82.toByte()) // SW1 SW2 for "File Not Found"
     }
+
 
     override fun onDeactivated(reason: Int) {
         // Handle card emulation deactivation if needed
