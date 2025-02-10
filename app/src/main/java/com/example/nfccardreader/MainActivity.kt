@@ -63,56 +63,42 @@ class MainActivity : ComponentActivity() {
 
                 val responses = mutableListOf<String>()
 
-                for (command in cmd.commands) {
-                    try {
-                        val response = isoDep.transceive(command)
-                        Log.d("APDU Response" , "$response")
-                        val parsedResponse = response.joinToString(" ") { "%02X".format(it) }
-                        responses.add(parsedResponse)
-                    } catch (e: Exception) {
-                        responses.add("Error with command: ${e.message}")
-                    }
+                // Define custom command
+                val customCommand = byteArrayOf(
+                    0x00, 0xA4.toByte(), 0x04, 0x00, 0x07, // Example command structure
+                    0xA0.toByte(), 0x00, 0x00, 0x00, 0x04, 0x10, 0x10 // Example data
+                )
+
+                try {
+                    // Send custom APDU command
+                    val response = isoDep.transceive(customCommand)
+
+                    // Convert byte array to readable string
+                    val parsedResponse = response.joinToString(" ") { "%02X".format(it) }
+
+                    // Add response to the list
+                    responses.add("Custom Command Response: $parsedResponse")
+
+                    // Log response
+                    Log.d("APDU Custom Response", "Command: ${customCommand.joinToString(" ") { "%02X".format(it) }}\nResponse: $parsedResponse")
+
+                } catch (e: Exception) {
+                    val errorMsg = "Error with custom command: ${e.message}"
+                    responses.add(errorMsg)
+                    Log.e("APDU Error", errorMsg, e)
                 }
 
-                responses.forEachIndexed { i, m ->
-                    saveCardData(i,m)
-                }
-                showEmulationPrompt()
-                textView.text = responses.joinToString("\n")
+                // Update UI with response
+                runOnUiThread { textView.text = responses.joinToString("\n") }
 
-                Log.d("APDU Responses", responses.joinToString("\n"))
                 isoDep.close()
+
             } catch (e: Exception) {
+                Log.e("NFC_ERROR", "Error reading NFC tag", e)
                 Toast.makeText(this, "Error reading card: ${e.message}", Toast.LENGTH_LONG).show()
             }
-        }
-    }
-    private fun saveCardData(index : Int, data: String) {
-        val prefs = getSharedPreferences("CardData", MODE_PRIVATE)
-        prefs.edit().putString(index.toString(), data).apply()
-    }
-    private fun showEmulationPrompt() {
-        val builder = android.app.AlertDialog.Builder(this)
-        builder.setTitle("Card Saved")
-            .setMessage("Do you want to emulate this card?")
-            .setPositiveButton("Yes") { _, _ ->
-                startCardEmulation()
-            }
-            .setNegativeButton("No") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
-    }
-
-    private fun startCardEmulation() {
-        val prefs = getSharedPreferences("CardData", MODE_PRIVATE)
-        val apduResponses = (0 until prefs.all.size).mapNotNull { prefs.getString(it.toString(), null) }
-
-        if (apduResponses.isNotEmpty()) {
-            Toast.makeText(this, "Card emulation ready", Toast.LENGTH_SHORT).show()
-            // Let the system know that emulation can proceed (if required)
         } else {
-            Toast.makeText(this, "No card data available to emulate", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "NFC tag does not support IsoDep", Toast.LENGTH_LONG).show()
         }
     }
 
