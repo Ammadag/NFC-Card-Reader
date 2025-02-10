@@ -6,8 +6,9 @@ import android.util.Log
 
 class CardEmulatorService : HostApduService() {
 
-    private val command = CommandMap()
-    private val cmdMap = command.commandResponseMap
+
+//    private val command = CommandMap()
+//    private val cmdMap = command.commandResponseMap
 
     override fun processCommandApdu(commandApdu: ByteArray, extras: Bundle?): ByteArray? {
         // Convert the incoming APDU command to a hex string
