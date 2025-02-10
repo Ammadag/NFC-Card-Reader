@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
 
     private var nfcAdapter: NfcAdapter? = null
     private lateinit var textView: TextView
-    private val cmd  = cmds()
+    private val cmd = cmds()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,47 +61,35 @@ class MainActivity : ComponentActivity() {
             try {
                 isoDep.connect()
 
-                val responses = mutableListOf<String>()
-
-                // Define custom command
-                val customCommand = byteArrayOf(
-                    0x00, 0xA4.toByte(), 0x04, 0x00, 0x07, // Example command structure
-                    0xA0.toByte(), 0x00, 0x00, 0x00, 0x04, 0x10, 0x10 // Example data
+                // Select AID
+                val selectAIDCommand = byteArrayOf(
+                    0x00, 0xA4.toByte(), 0x04, 0x00, 0x07,
+                    0xA0.toByte(), 0x00, 0x00, 0x00, 0x04, 0x10, 0x10
                 )
 
-                try {
-                    // Send custom APDU command
+                val aidResponse = isoDep.transceive(selectAIDCommand)
+                val parsedAidResponse = aidResponse.joinToString(" ") { "%02X".format(it) }
+                Log.d("APDU Response", "AID Response: $parsedAidResponse")
+
+                // Check if AID was successfully selected
+                if (parsedAidResponse == "90 00") {
+                    // Send Custom Command
+                    val customCommand = byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x10)
                     val response = isoDep.transceive(customCommand)
+                    val parsedResponse = response.toString(Charsets.UTF_8).trim()
 
-                    // Convert byte array to readable string
-                    val parsedResponse = response.joinToString(" ") { "%02X".format(it) }
-
-                    // Add response to the list
-                    responses.add("Custom Command Response: $parsedResponse")
-
-                    // Log response
-                    Log.d("APDU Custom Response", "Command: ${customCommand.joinToString(" ") { "%02X".format(it) }}\nResponse: $parsedResponse")
-
-                } catch (e: Exception) {
-                    val errorMsg = "Error with custom command: ${e.message}"
-                    responses.add(errorMsg)
-                    Log.e("APDU Error", errorMsg, e)
+                    textView.text = "Response: $parsedResponse"
+                    Log.d("APDU Response", "Custom Command Response: $parsedResponse")
+                } else {
+                    Log.d("APDU Response", "AID Selection Failed")
                 }
 
-                // Update UI with response
-                runOnUiThread { textView.text = responses.joinToString("\n") }
-
                 isoDep.close()
-
             } catch (e: Exception) {
-                Log.e("NFC_ERROR", "Error reading NFC tag", e)
                 Toast.makeText(this, "Error reading card: ${e.message}", Toast.LENGTH_LONG).show()
             }
-        } else {
-            Toast.makeText(this, "NFC tag does not support IsoDep", Toast.LENGTH_LONG).show()
         }
     }
-
 }
 
 
