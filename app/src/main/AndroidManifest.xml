@@ -39,11 +39,10 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
 
-                <data android:scheme="http" />
+                <data android:scheme="http"/>
             </intent-filter>
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -23,7 +23,6 @@ class SenderActivity : AppCompatActivity() {
         Log.d("DeviceHCE", "HCE Supported: $hasHCE")
         val btnSend = findViewById<Button>(R.id.btn_send_msg)
         val message = findViewById<EditText>(R.id.et_send_msg)
-
         val msg = message.text.toString()
 
         val bundle = Bundle().apply {
