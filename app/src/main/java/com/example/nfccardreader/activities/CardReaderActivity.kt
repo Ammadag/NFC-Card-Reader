@@ -1,4 +1,4 @@
-package com.example.nfccardreader
+package com.example.nfccardreader.activities
 
 import android.app.PendingIntent
 import android.content.Intent
@@ -8,18 +8,17 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
+import com.example.nfccardreader.R
 
-
-class MainActivity : ComponentActivity() {
+class CardReaderActivity : AppCompatActivity() {
 
     private var nfcAdapter: NfcAdapter? = null
     private lateinit var textView: TextView
-    private val cmd = cmds()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_card_reader)
 
         textView = findViewById(R.id.textView)
 
@@ -38,10 +37,10 @@ class MainActivity : ComponentActivity() {
         nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
     }
 
-    override fun onPause() {
-        super.onPause()
-        nfcAdapter?.disableForegroundDispatch(this)
-    }
+//    override fun onPause() {
+//        super.onPause()
+//        nfcAdapter?.disableForegroundDispatch(this)
+//    }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
