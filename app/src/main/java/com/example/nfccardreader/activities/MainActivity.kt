@@ -1,9 +1,11 @@
 package com.example.nfccardreader.activities
 
 import android.content.Intent
+import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.ComponentActivity
+import com.example.nfccardreader.CardEmulatorService
 import com.example.nfccardreader.R
 
 
@@ -17,15 +19,24 @@ class MainActivity : ComponentActivity() {
         val buttonReceive = findViewById<Button>(R.id.btn_reciever)
 
         buttonSend.setOnClickListener {
+            disableNfcReaderMode()
             val intent = Intent(this, SenderActivity::class.java)
             startActivity(intent)
         }
         buttonReceive.setOnClickListener {
+            stopHceService()
             val intent = Intent(this, CardReaderActivity::class.java)
             startActivity(intent)
         }
 
+    }
+    fun stopHceService() {
+        val intent = Intent(this, CardEmulatorService::class.java)
+        stopService(intent)
+    }
 
-
+    fun disableNfcReaderMode() {
+        val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        nfcAdapter.disableReaderMode(this)
     }
 }

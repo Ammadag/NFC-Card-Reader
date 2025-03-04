@@ -8,10 +8,10 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import com.example.nfccardreader.R
 
-class CardReaderActivity : AppCompatActivity() {
+class CardReaderActivity : ComponentActivity() {
 
     private var nfcAdapter: NfcAdapter? = null
     private lateinit var textView: TextView
@@ -37,10 +37,10 @@ class CardReaderActivity : AppCompatActivity() {
         nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
     }
 
-//    override fun onPause() {
-//        super.onPause()
-//        nfcAdapter?.disableForegroundDispatch(this)
-//    }
+    override fun onPause() {
+        super.onPause()
+        nfcAdapter?.disableForegroundDispatch(this)
+    }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
