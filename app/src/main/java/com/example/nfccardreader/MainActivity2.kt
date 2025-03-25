@@ -6,24 +6,38 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.nfccardreader.databinding.ActivityMain2Binding
 
 class MainActivity2 : AppCompatActivity() {
+
+    private var _binding: ActivityMain2Binding? = null
+    private val binding get() = _binding!!
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        _binding = ActivityMain2Binding.inflate(layoutInflater)
+        setContentView(binding.root)
         enableEdgeToEdge()
-        setContentView(R.layout.activity_main2)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
         val pm = packageManager
         val hasHCE = pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
         Log.d("DeviceHCE", "HCE Supported: $hasHCE")
 
-        startService(Intent(this,CardEmulatorService::class.java))
+
+        binding.btnSend.setOnClickListener {
+            val message = binding.etMessage.text.toString().trim()
+
+            if (message.isNotEmpty()) {
+                val intent = Intent(this@MainActivity2, CardEmulatorService::class.java).apply {
+                    putExtra("MESSAGE_KEY", message)
+                }
+                startService(intent)
+                Log.d("MainActivity2", "Sent Message: $message")
+            } else {
+                Log.e("MainActivity2", "Message is empty!")
+            }
+        }
+
     }
 
 }

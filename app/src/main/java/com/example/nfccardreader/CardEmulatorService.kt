@@ -1,10 +1,19 @@
 package com.example.nfccardreader
 
+import android.content.Intent
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
 
 class CardEmulatorService : HostApduService() {
+
+    private var message: String = "Default Message"
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        message = intent?.getStringExtra("MESSAGE_KEY") ?: "Default Message"
+        Log.d("HCE", "Received Message: $message")
+        return START_STICKY
+    }
 
     override fun processCommandApdu(commandApdu: ByteArray?, extras: Bundle?): ByteArray {
         if (commandApdu == null) {
@@ -29,20 +38,19 @@ class CardEmulatorService : HostApduService() {
 
             // Custom Command (e.g., 00 B0 00 00 10)
             commandApdu.contentEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x10)) -> {
-                Log.d("HCE Response", "Custom Command Received")
-                val message = "Hello from HCE!"
+                Log.d("HCE Response", "Sending Received Message: $message")
                 message.toByteArray() + "9000".hexStringToByteArray() // Append success status
             }
 
             else -> {
                 Log.d("HCE Response", "Command Not Recognized")
-                "6A 82".hexStringToByteArray() // File Not Found
+                "6A82".hexStringToByteArray() // File Not Found
             }
         }
     }
 
     override fun onDeactivated(reason: Int) {
-        // Handle card emulation deactivation if needed
+        Log.d("HCE", "Service Deactivated: $reason")
     }
 }
 
