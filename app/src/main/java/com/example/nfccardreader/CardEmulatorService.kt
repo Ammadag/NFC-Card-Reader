@@ -18,7 +18,7 @@ class CardEmulatorService : HostApduService() {
         Log.d("HCE Received Command", hexCommand)
 
         return when {
-            // AID Selection
+
             commandApdu.contentEquals(
                 byteArrayOf(
                     0x00, 0xA4.toByte(), 0x04, 0x00, 0x07,

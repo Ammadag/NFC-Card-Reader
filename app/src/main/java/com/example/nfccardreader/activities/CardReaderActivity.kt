@@ -10,6 +10,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.example.nfccardreader.R
+import com.example.nfccardreader.utils.usersession
 
 class CardReaderActivity : ComponentActivity() {
 
@@ -44,8 +45,9 @@ class CardReaderActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        val sending = usersession.isSending
         val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
-        if (tag != null) {
+        if (tag != null && !sending ) {
             readFromNfcTag(tag)
         }
     }
