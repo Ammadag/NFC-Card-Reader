@@ -12,24 +12,26 @@
         tools:layout_editor_absoluteY="16dp">
 
         <EditText
-            android:id="@+id/et_send_msg"
-            android:layout_width="180dp"
+            android:id="@+id/et_message"
+            android:layout_width="200dp"
             android:layout_height="70dp"
-            android:hint="type your msg here"
+            android:autofillHints="Type your message here"
+            android:hint="@string/type_your_msg_here"
+            android:inputType="textNoSuggestions"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/btn_send_msg"
+            android:id="@+id/btn_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="send"
+            android:text="@string/send"
             android:layout_marginTop="40dp"
-            app:layout_constraintStart_toStartOf="@+id/et_send_msg"
-            app:layout_constraintEnd_toEndOf="@id/et_send_msg"
-            app:layout_constraintTop_toBottomOf="@id/et_send_msg"/>
+            app:layout_constraintStart_toStartOf="@+id/et_message"
+            app:layout_constraintEnd_toEndOf="@id/et_message"
+            app:layout_constraintTop_toBottomOf="@id/et_message"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

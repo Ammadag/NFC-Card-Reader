@@ -1,14 +1,21 @@
 package com.example.nfccardreader
 
+import android.content.Intent
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 
 class CardEmulatorService : HostApduService() {
 
+    private var message: String = "Default Message"
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        message = intent?.getStringExtra("MESSAGE_KEY") ?: "Default Message"
+        Log.d("HCE", "Received Message: $message")
+        return START_STICKY
+    }
+
     override fun processCommandApdu(commandApdu: ByteArray?, extras: Bundle?): ByteArray {
-        Log.d("Service", "started")
         if (commandApdu == null) {
             Log.e("HCE", "Received null APDU command")
             return "6F00".hexStringToByteArray() // Custom error response
@@ -18,7 +25,7 @@ class CardEmulatorService : HostApduService() {
         Log.d("HCE Received Command", hexCommand)
 
         return when {
-
+            // AID Selection
             commandApdu.contentEquals(
                 byteArrayOf(
                     0x00, 0xA4.toByte(), 0x04, 0x00, 0x07,
@@ -31,21 +38,19 @@ class CardEmulatorService : HostApduService() {
 
             // Custom Command (e.g., 00 B0 00 00 10)
             commandApdu.contentEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x10)) -> {
-                Log.d("HCE Response", "Custom Command Received")
-                val receivedMsg = extras?.getString("CUSTOM_MESSAGE") ?: "Default Response"
-
-                receivedMsg.toByteArray() + "9000".hexStringToByteArray()
+                Log.d("HCE Response", "Sending Received Message: $message")
+                message.toByteArray() + "9000".hexStringToByteArray() // Append success status
             }
 
             else -> {
                 Log.d("HCE Response", "Command Not Recognized")
-                "6A 82".hexStringToByteArray() // File Not Found
+                "6A82".hexStringToByteArray() // File Not Found
             }
         }
     }
 
     override fun onDeactivated(reason: Int) {
-        Toast.makeText(this, "Service Deactivated", Toast.LENGTH_SHORT).show()
+        Log.d("HCE", "Service Deactivated: $reason")
     }
 }
 

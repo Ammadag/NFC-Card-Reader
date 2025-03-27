@@ -3,41 +3,42 @@ package com.example.nfccardreader.activities
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
-import android.widget.Button
-import android.widget.EditText
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.example.nfccardreader.CardEmulatorService
-import com.example.nfccardreader.R
+import com.example.nfccardreader.databinding.ActivitySenderBinding
 
 class SenderActivity : AppCompatActivity() {
+
+    private var _binding: ActivitySenderBinding? = null
+    private val binding get() = _binding!!
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_sender)
+        _binding = ActivitySenderBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        enableEdgeToEdge()
         val pm = packageManager
         val hasHCE = pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
         Log.d("DeviceHCE", "HCE Supported: $hasHCE")
-        val btnSend = findViewById<Button>(R.id.btn_send_msg)
-        val message = findViewById<EditText>(R.id.et_send_msg)
-        val msg = message.text.toString()
 
-        val bundle = Bundle().apply {
-            putString("CUSTOM_MESSAGE", msg)
-        }
 
-        btnSend.setOnClickListener {
-            val intent = Intent(this, CardEmulatorService::class.java).apply {
-                putExtras(bundle)
+        binding.btnSend.setOnClickListener {
+            val message = binding.etMessage.text.toString().trim()
+
+            if (message.isNotEmpty()) {
+                val intent = Intent(this@SenderActivity, CardEmulatorService::class.java).apply {
+                    putExtra("MESSAGE_KEY", message)
+                }
+                startService(intent)
+                Log.d("MainActivity2", "Sent Message: $message")
+            } else {
+                Log.e("MainActivity2", "Message is empty!")
             }
-            startService(intent)
-            Handler(Looper.getMainLooper()).postDelayed({
-                Log.d("HCE Service", "response sent")
-                stopService(intent)
-            }, 5000)
         }
+
     }
+
 }
