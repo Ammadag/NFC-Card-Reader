@@ -2,6 +2,7 @@ package com.example.nfccardreader.activities
 
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
@@ -13,6 +14,7 @@ class SenderActivity : AppCompatActivity() {
 
     private var _binding: ActivitySenderBinding? = null
     private val binding get() = _binding!!
+    private var nfcAdapter: NfcAdapter? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +24,9 @@ class SenderActivity : AppCompatActivity() {
         enableEdgeToEdge()
         val pm = packageManager
         val hasHCE = pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)
-        Log.d("DeviceHCE", "HCE Supported: $hasHCE")
+        Log.d(TAG, "HCE Supported: $hasHCE")
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+
 
 
         binding.btnSend.setOnClickListener {
@@ -33,12 +37,34 @@ class SenderActivity : AppCompatActivity() {
                     putExtra("MESSAGE_KEY", message)
                 }
                 startService(intent)
-                Log.d("MainActivity2", "Sent Message: $message")
+                Log.d(TAG, "Sent Message: $message")
             } else {
-                Log.e("MainActivity2", "Message is empty!")
+                Log.e(TAG, "Message is empty!")
             }
         }
 
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (nfcAdapter != null) {
+            nfcAdapter?.disableForegroundDispatch(this)
+            Log.d("SenderActivity", "Foreground dispatch disabled.")
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (nfcAdapter != null) {
+            nfcAdapter?.disableForegroundDispatch(this)
+            Log.d("SenderActivity", "Foreground dispatch disabled.")
+        }
+    }
+    override fun onBackPressed() {
+        super.onBackPressed()
+
+        val nIntent= Intent(this@SenderActivity, CardEmulatorService::class.java)
+        stopService(nIntent)
+
+    }
 }

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.nfc.cardemulation.HostApduService
 import android.os.Bundle
 import android.util.Log
+import com.example.nfccardreader.activities.TAG
 
 class CardEmulatorService : HostApduService() {
 
@@ -11,7 +12,7 @@ class CardEmulatorService : HostApduService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         message = intent?.getStringExtra("MESSAGE_KEY") ?: "Default Message"
-        Log.d("HCE", "Received Message: $message")
+        Log.d(TAG, "Received Message: $message")
         return START_STICKY
     }
 
@@ -22,35 +23,35 @@ class CardEmulatorService : HostApduService() {
         }
 
         val hexCommand = commandApdu.joinToString(" ") { "%02X".format(it) }
-        Log.d("HCE Received Command", hexCommand)
+        Log.d(TAG, "Command Received = $hexCommand")
 
         return when {
             // AID Selection
             commandApdu.contentEquals(
                 byteArrayOf(
                     0x00, 0xA4.toByte(), 0x04, 0x00, 0x07,
-                    0xA0.toByte(), 0x00, 0x00, 0x00, 0x04, 0x10, 0x10
+                    0xF0.toByte(), 0x00, 0x00, 0x00, 0x01, 0x01, 0x01
                 )
             ) -> {
-                Log.d("HCE Response", "AID Selected")
+                Log.d(TAG, "AID Selected")
                 "9000".hexStringToByteArray() // Success Response
             }
 
             // Custom Command (e.g., 00 B0 00 00 10)
             commandApdu.contentEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x10)) -> {
-                Log.d("HCE Response", "Sending Received Message: $message")
+                Log.d(TAG, "Sending Received Message: $message")
                 message.toByteArray() + "9000".hexStringToByteArray() // Append success status
             }
 
             else -> {
-                Log.d("HCE Response", "Command Not Recognized")
+                Log.d(TAG, "Command Not Recognized")
                 "6A82".hexStringToByteArray() // File Not Found
             }
         }
     }
 
     override fun onDeactivated(reason: Int) {
-        Log.d("HCE", "Service Deactivated: $reason")
+        Log.d(TAG, "Service Deactivated: $reason")
     }
 }
 
