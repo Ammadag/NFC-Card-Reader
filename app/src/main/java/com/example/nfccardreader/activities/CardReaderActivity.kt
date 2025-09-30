@@ -82,17 +82,19 @@ class CardReaderActivity : ComponentActivity() {
                 // Select AID
                 val selectAIDCommand = byteArrayOf(
                     0x00, 0xA4.toByte(), 0x04, 0x00, 0x07,
-                    0xF0.toByte(), 0x00, 0x00, 0x00, 0x01, 0x01, 0x01
+                    0xA0.toByte(), 0x00, 0x00, 0x00, 0x04, 0x10, 0x10,
+                    0x00
                 )
 
                 val aidResponse = isoDep.transceive(selectAIDCommand)
                 val parsedAidResponse = aidResponse.joinToString(" ") { "%02X".format(it) }
-                Toast.makeText(this, "Aid Selection Successfull", Toast.LENGTH_LONG).show()
 
                 Log.d(TAG, "AID Response: $parsedAidResponse")
 
                 // Check if AID was successfully selected
                 if (parsedAidResponse == "90 00") {
+                    Toast.makeText(this, "Aid Selection Successfull", Toast.LENGTH_LONG).show()
+
                     // Send Custom Command
                     val customCommand = byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x10)
                     val response = isoDep.transceive(customCommand)
